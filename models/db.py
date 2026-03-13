@@ -3,7 +3,7 @@ from mysql.connector import Error
 import streamlit as st
 
 class DatabaseConnection:
-    def __init__(self, host=None, user=None, password=None, database=None):
+    def __init__(self, host=None, user=None, password=None, database=None, port=None):
         # Load from Streamlit secrets if available, else use defaults
         try:
             secrets = st.secrets["mysql"]
@@ -11,12 +11,14 @@ class DatabaseConnection:
             self.user = user or secrets["user"]
             self.password = password or secrets["password"]
             self.database = database or secrets["database"]
+            self.port = port or secrets.get("port", 3306)
         except (KeyError, FileNotFoundError):
             # Fallback for local development
             self.host = host or 'localhost'
             self.user = user or 'root'
             self.password = password or ''
             self.database = database or 'IT20FinalProj'
+            self.port = port or 3306
         self.connection = None
 
     def connect(self):
@@ -26,7 +28,8 @@ class DatabaseConnection:
                 host=self.host,
                 user=self.user,
                 password=self.password,
-                database=self.database
+                database=self.database,
+                port=self.port
             )
             return self.connection
         except Error as e:
@@ -39,7 +42,8 @@ class DatabaseConnection:
             conn = mysql.connector.connect(
                 host=self.host,
                 user=self.user,
-                password=self.password
+                password=self.password,
+                port=self.port
             )
             cursor = conn.cursor()
             cursor.execute(f"CREATE DATABASE IF NOT EXISTS {self.database}")
