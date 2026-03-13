@@ -3,11 +3,20 @@ from mysql.connector import Error
 import streamlit as st
 
 class DatabaseConnection:
-    def __init__(self, host='localhost', user='root', password='', database='IT20FinalProj'):
-        self.host = host
-        self.user = user
-        self.password = password
-        self.database = database
+    def __init__(self, host=None, user=None, password=None, database=None):
+        # Load from Streamlit secrets if available, else use defaults
+        try:
+            secrets = st.secrets["mysql"]
+            self.host = host or secrets["host"]
+            self.user = user or secrets["user"]
+            self.password = password or secrets["password"]
+            self.database = database or secrets["database"]
+        except (KeyError, FileNotFoundError):
+            # Fallback for local development
+            self.host = host or 'localhost'
+            self.user = user or 'root'
+            self.password = password or ''
+            self.database = database or 'IT20FinalProj'
         self.connection = None
 
     def connect(self):
